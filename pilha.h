@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "int_48.h"
 
+#ifndef PILHA_H
+#define PILHA_H
+
 typedef struct pilha{
 	struct node* head;
 } Pilha;
@@ -19,4 +22,10 @@ void push(Pilha* pilha, int48_t number);
 
 int48_t pop(Pilha* pilha);
 
+int48_t top(Pilha* pilha);
+
 void print_pilha(Pilha* pilha);
+
+void free_pilha(Pilha** pilha);
+
+#endif
