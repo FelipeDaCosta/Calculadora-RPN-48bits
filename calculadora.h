@@ -5,10 +5,23 @@
 
 enum {SOMA = 43, SUB = 45, MULT = 42, DIV = 47, OPENING_PAR = 40, CLOSING_PAR = 41};
 
+/*
+* Vao ser necessarias 4 pilhas.
+* duas vao ser usadas para guardar o formato RPN 
+* (output_rpn que guarda numeros e operandos e is_op que guarda quais
+* numeros do output_rpn sao operandos)
+* E duas para de fato resolver o problema.
+* (operandos guarda os operandos para posicionalos devidamente
+* de acordo com o algoritmo. A solver guarda os numeros e vai realizando
+* as operacoes)
+*/
 typedef struct calculadora {
-	Pilha* operandos; // Usada na conversao de infix para rpn
-	Pilha* output_rpn; // Aqui fica os operandos e numeros ja em posicao rpn
+	// As duas primeiras sao usadas pra guardar a operacao em formato rpn
+	Pilha* output_rpn; // Aqui fica os operandos e numeros em posicao rpn
 	Pilha* is_op; // Para saber quais elementos da output_rpn sao operacoes
+	// As duas ultimas sao usadas para resolver o problema
+	Pilha* operandos; // Usada na conversao de infix para rpn
+	Pilha* solver; // Pilha usada para resolver o problema
 } Calculadora;
 
 /*
@@ -24,18 +37,30 @@ Calculadora* create_calculadora();
 */
 int48_t get_num(int* starting, char* string);
 
+/*
+* Coloca um valor nas devidas pilhas
+*/
+void push_value_calc(Calculadora* calc, int48_t value);
+
+/*
+* Faz pop de operacao da pilha calculadora->operandos.
+* (Realiza a operacao em solver e empilha o operando em output_rpn e is_op)
+*/
+void pop_operation(Calculadora* calc, char op);
 
 /*
 * Recebe uma calculadora e uma string contendo uma expressao infixa
 * Empilha as operacoes na posicao RPN na output_rpn da calculadora
 */
-void set_rpn_from_infix(Calculadora* calc, char* infix_expression);
+int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression);
 
 /*
-*
-*
+* Imprime no formato RPN (Guardado na pilha output_rpn)
 */
-int48_t get_result(Calculadora* calc);
-
 void print_rpn_format(Calculadora* calc);
+
+/*
+* Libera memoria da calculadora
+*/
+void free_calc(Calculadora* calc);
 

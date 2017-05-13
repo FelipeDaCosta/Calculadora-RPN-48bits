@@ -11,6 +11,7 @@ Calculadora* create_calculadora()
 	new_calculadora->operandos = create_pilha();
 	new_calculadora->output_rpn = create_pilha();
 	new_calculadora->is_op = create_pilha();
+	new_calculadora->solver = create_pilha();
 	return new_calculadora;
 }
 
@@ -28,6 +29,40 @@ static int is_op(char c)
 static int is_parenthesis(char c)
 {
 	return c == OPENING_PAR || c == CLOSING_PAR;
+}
+
+void push_value_calc(Calculadora* calc, int48_t value)
+{
+	push_bellow(calc->output_rpn, value);
+	push_bellow(calc->is_op, 0);
+	push(calc->solver, value);	
+}
+
+void pop_operation(Calculadora* calc, char op)
+{
+	push_bellow(calc->output_rpn, (int48_t) op);
+	push_bellow(calc->is_op, 1);
+
+
+	int48_t first = pop(calc->solver);
+	int48_t second = pop(calc->solver);
+	switch(op){
+		case SOMA:
+			push(calc->solver, first+second);
+			break;
+		case SUB:
+			push(calc->solver, second-first);
+			break;
+		case MULT:
+			push(calc->solver, first*second);
+			break;
+		case DIV:
+			push(calc->solver, second/first);
+			break;
+		default:
+			printf("Ocorreu um erro: Verifique se sua expressao esta correta e tente novamente\n");
+			exit(0);
+	}
 }
 
 /*
@@ -75,24 +110,26 @@ int48_t get_num(int* starting, char* string)
 /*
 * implementacao do algoritmo shunting yard. 
 */
-void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
+int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 {
 	if(!calc)
-		return;
+		return -1;
 
 	if(!calc->operandos || !calc->output_rpn)
-		return;
+		return -1;
 
 	// Loop pela string inteira, para cada caso (numero, operacao, parentesis)
 	// faz alguma coisa diferente
 	for(int str_pointer = 0; str_pointer < strlen(infix_expression); str_pointer++)
 	{
 		char cur = infix_expression[str_pointer];
+		if(cur == ' ' || cur == '\n') // Ignorar espacos e newlines
+			continue;
+
 		if(is_num(cur))
 		{
 			int48_t value = get_num(&str_pointer, infix_expression);
-			push_bellow(calc->output_rpn, value);
-			push_bellow(calc->is_op, 0);
+			push_value_calc(calc, value);
 		}
 
 		else if(is_op(cur))
@@ -100,8 +137,7 @@ void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 			while(top(calc->operandos) != -1 && take_from_stack(cur, top(calc->operandos)))
 			{
 				char op = pop(calc->operandos);
-				push_bellow(calc->output_rpn, (int48_t) op);
-				push_bellow(calc->is_op, 1);
+				pop_operation(calc, op);
 			}
 			// Os operandos sao empilhados normalmente na pilha de operandos
 			push(calc->operandos, (int48_t) cur);
@@ -114,8 +150,7 @@ void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 				char op;
 				while( (op = pop(calc->operandos)) != OPENING_PAR 	)
 				{
-					push_bellow(calc->output_rpn, (int48_t) op);
-					push_bellow(calc->is_op, 1);
+					pop_operation(calc, op);
 				}
 			}
 			else
@@ -124,14 +159,19 @@ void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 				push(calc->operandos, (int48_t) cur);
 			}
 		}
+		else {
+			printf("Caracter Duvidoso: %c\n", cur);
+			printf("Ocorreu um erro: Verifique se sua expressao esta correta e tente novamente\n");
+			exit(0);
+		}
 	}
 	// Coloca o resto das operacoes na pilha
 	char op;
 	while( (op = pop(calc->operandos)) != -1 	)
 	{
-		push_bellow(calc->output_rpn, (int48_t) op);
-		push_bellow(calc->is_op, 1);
+		pop_operation(calc, op);
 	}
+	return top(calc->solver);
 }
 
 void print_rpn_format(Calculadora* calc)
@@ -168,8 +208,12 @@ void print_rpn_format(Calculadora* calc)
 	printf("\n");
 }
 
-int48_t get_result(Calculadora* calc)
+void free_calc(Calculadora* calc)
 {
-
-	return 0;
+	free_pilha(&calc->output_rpn);
+	free_pilha(&calc->operandos);
+	free_pilha(&calc->is_op);
+	free_pilha(&calc->solver);
+	free(calc);
 }
+
