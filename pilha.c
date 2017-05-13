@@ -9,6 +9,7 @@ Pilha* create_pilha()
 		return NULL;
 	}
 	new_pilha->head = NULL;
+	new_pilha->last = NULL;
 	return new_pilha;
 }
 
@@ -34,7 +35,27 @@ void push(Pilha* pilha, int48_t number)
 			return;
 
 		new->next = pilha->head;
+		if(!pilha->head) // First
+			pilha->last = new;
+
 		pilha->head = new;
+	}
+}
+
+void push_bellow(Pilha* pilha, int48_t number)
+{
+	if(!pilha)
+		return;
+	Node* new = create_node(number);
+	if(!pilha->head) // First
+	{
+		pilha->head = new;
+		pilha->last = new;
+	}
+	else
+	{
+		pilha->last->next = new;
+		pilha->last = new;
 	}
 }
 

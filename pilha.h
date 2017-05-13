@@ -7,6 +7,7 @@
 
 typedef struct pilha{
 	struct node* head;
+	struct node* last;
 } Pilha;
 
 typedef struct node{
@@ -19,6 +20,12 @@ Pilha* create_pilha();
 Node* create_node(int48_t number);
 
 void push(Pilha* pilha, int48_t number);
+
+// Para transformar a expressao em RPN vamos usar o alrotimo shunting yard
+// para que esse algoritmo trasnforme a expressao corretamente
+// precisamos empilhar na ordem inversa por isso iremos usar
+// essa funcao para empilhar pra baixo
+void push_bellow(Pilha* pilha, int48_t number);
 
 int48_t pop(Pilha* pilha);
 

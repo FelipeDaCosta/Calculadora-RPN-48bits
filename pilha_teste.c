@@ -15,8 +15,9 @@ int main()
 	assert(top(pilha) == 1);
 	assert(pop(pilha) == 1);
 	assert(pop(pilha) == -1);
-	push(pilha, 1);
-	push(pilha, 2);
+	push_bellow(pilha, 1);
+	push_bellow(pilha, 2);
+	assert(top(pilha) == 1);
 	free_pilha(&pilha);
 	assert(pilha == NULL);
 	printf("\n\nSUCCESS: Modulo pilha passou em todos os testes.\n\n");

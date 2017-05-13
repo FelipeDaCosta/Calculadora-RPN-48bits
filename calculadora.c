@@ -31,10 +31,13 @@ static int is_parenthesis(char c)
 }
 
 /*
-* Sempre que for mult ou div vai ter precedencia pq so pode (*+-/)
-* A precedencia funciona assim () > * / > +- 
+* Decidi se a operacao deve ser tirada do stack de operacoes e colocada
+* na stack de output. 
+* Parentesis nunca sao tirados
+* soma e subtracao so sao tirados se for colocar outra soma e subtracao
+* divisa oe multiplicacao sao tirados por qualquer operados
 */
-static int has_precedence(char new, char on_stack)
+static int take_from_stack(char new, char on_stack)
 {
 	if(on_stack == OPENING_PAR || on_stack == CLOSING_PAR)
 	{
@@ -48,9 +51,7 @@ static int has_precedence(char new, char on_stack)
 	}
 	else
 	{
-		if(new == DIV || new == MULT)
-			return 1;
-		return 0;
+		return 1;
 	}
 }
 
@@ -90,18 +91,19 @@ void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 		if(is_num(cur))
 		{
 			int48_t value = get_num(&str_pointer, infix_expression);
-			push(calc->output_rpn, value);
-			push(calc->is_op, 0);
+			push_bellow(calc->output_rpn, value);
+			push_bellow(calc->is_op, 0);
 		}
 
 		else if(is_op(cur))
 		{
-			if(top(calc->operandos) != -1 && has_precedence(cur, top(calc->operandos)))
+			while(top(calc->operandos) != -1 && take_from_stack(cur, top(calc->operandos)))
 			{
 				char op = pop(calc->operandos);
-				push(calc->output_rpn, (int48_t) op);
-				push(calc->is_op, 1);
+				push_bellow(calc->output_rpn, (int48_t) op);
+				push_bellow(calc->is_op, 1);
 			}
+			// Os operandos sao empilhados normalmente na pilha de operandos
 			push(calc->operandos, (int48_t) cur);
 		}
 
@@ -112,12 +114,13 @@ void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 				char op;
 				while( (op = pop(calc->operandos)) != OPENING_PAR 	)
 				{
-					push(calc->output_rpn, (int48_t) op);
-					push(calc->is_op, 1);
+					push_bellow(calc->output_rpn, (int48_t) op);
+					push_bellow(calc->is_op, 1);
 				}
 			}
 			else
 			{
+				// Os operandos sao empilhados normalmente na pilha de operandos
 				push(calc->operandos, (int48_t) cur);
 			}
 		}
@@ -126,8 +129,8 @@ void set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 	char op;
 	while( (op = pop(calc->operandos)) != -1 	)
 	{
-		push(calc->output_rpn, (int48_t) op);
-		push(calc->is_op, 1);
+		push_bellow(calc->output_rpn, (int48_t) op);
+		push_bellow(calc->is_op, 1);
 	}
 }
 
