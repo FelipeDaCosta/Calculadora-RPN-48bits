@@ -1,5 +1,5 @@
-main: calculadora.o
-	gcc main.c -o test calculadora.o
+main: calculadora.o pilha.o
+	gcc main.c -o test calculadora.o pilha.o
 
 calculadora: pilha.o
 	gcc calculadora.c -o calculadora.o pilha.o
