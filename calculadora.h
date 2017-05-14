@@ -1,7 +1,7 @@
 #include <string.h> //
 #include <stdlib.h> // atoi()
+#include <stdint.h>
 #include "pilha.h"
-#include "int_48.h"
 
 enum {SOMA = 43, SUB = 45, MULT = 42, DIV = 47, OPENING_PAR = 40, CLOSING_PAR = 41};
 
@@ -35,12 +35,12 @@ Calculadora* create_calculadora();
 * Ao final retorna o numero representado na string como inteiro
 * e altera o ponteiro passado para apontar pro ultimo digito do numero
 */
-int48_t get_num(int* starting, char* string);
+int64_t get_num(int* starting, char* string);
 
 /*
 * Coloca um valor nas devidas pilhas
 */
-void push_value_calc(Calculadora* calc, int48_t value);
+void push_value_calc(Calculadora* calc, int64_t value);
 
 /*
 * Faz pop de operacao da pilha calculadora->operandos.
@@ -52,12 +52,17 @@ void pop_operation(Calculadora* calc, char op);
 * Recebe uma calculadora e uma string contendo uma expressao infixa
 * Empilha as operacoes na posicao RPN na output_rpn da calculadora
 */
-int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression);
+int64_t set_rpn_from_infix(Calculadora* calc, char* infix_expression);
 
 /*
 * Imprime no formato RPN (Guardado na pilha output_rpn)
 */
 void print_rpn_format(Calculadora* calc);
+
+/*
+* Checa se ocorreu overflow na aritmética de 48 bits
+*/
+void overflow(int64_t value);
 
 /*
 * Libera memoria da calculadora

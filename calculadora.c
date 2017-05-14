@@ -31,7 +31,7 @@ static int is_parenthesis(char c)
 	return c == OPENING_PAR || c == CLOSING_PAR;
 }
 
-void push_value_calc(Calculadora* calc, int48_t value)
+void push_value_calc(Calculadora* calc, int64_t value)
 {
 	push_bellow(calc->output_rpn, value);
 	push_bellow(calc->is_op, 0);
@@ -40,12 +40,12 @@ void push_value_calc(Calculadora* calc, int48_t value)
 
 void pop_operation(Calculadora* calc, char op)
 {
-	push_bellow(calc->output_rpn, (int48_t) op);
+	push_bellow(calc->output_rpn, (int64_t) op);
 	push_bellow(calc->is_op, 1);
 
 
-	int48_t first = pop(calc->solver);
-	int48_t second = pop(calc->solver);
+	int64_t first = pop(calc->solver);
+	int64_t second = pop(calc->solver);
 	switch(op){
 		case SOMA:
 			push(calc->solver, first+second);
@@ -90,9 +90,9 @@ static int take_from_stack(char new, char on_stack)
 	}
 }
 
-int48_t get_num(int* starting, char* string)
+int64_t get_num(int* starting, char* string)
 {
-	int48_t valor;
+	int64_t valor;
 	char str[20];
 	int str_pointer = 0;
 	for(; is_num(string[*starting]); (*starting)++, str_pointer++)
@@ -110,7 +110,7 @@ int48_t get_num(int* starting, char* string)
 /*
 * implementacao do algoritmo shunting yard. 
 */
-int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
+int64_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 {
 	if(!calc)
 		return -1;
@@ -120,7 +120,8 @@ int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 
 	// Loop pela string inteira, para cada caso (numero, operacao, parentesis)
 	// faz alguma coisa diferente
-	for(int str_pointer = 0; str_pointer < strlen(infix_expression); str_pointer++)
+	int str_pointer;
+	for(str_pointer = 0; str_pointer < strlen(infix_expression); str_pointer++)
 	{
 		char cur = infix_expression[str_pointer];
 		if(cur == ' ' || cur == '\n') // Ignorar espacos e newlines
@@ -128,7 +129,7 @@ int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 
 		if(is_num(cur))
 		{
-			int48_t value = get_num(&str_pointer, infix_expression);
+			int64_t value = get_num(&str_pointer, infix_expression);
 			push_value_calc(calc, value);
 		}
 
@@ -140,7 +141,7 @@ int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 				pop_operation(calc, op);
 			}
 			// Os operandos sao empilhados normalmente na pilha de operandos
-			push(calc->operandos, (int48_t) cur);
+			push(calc->operandos, (int64_t) cur);
 		}
 
 		else if(is_parenthesis(cur))
@@ -156,7 +157,7 @@ int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 			else
 			{
 				// Os operandos sao empilhados normalmente na pilha de operandos
-				push(calc->operandos, (int48_t) cur);
+				push(calc->operandos, (int64_t) cur);
 			}
 		}
 		else {
@@ -176,7 +177,8 @@ int48_t set_rpn_from_infix(Calculadora* calc, char* infix_expression)
 
 void print_rpn_format(Calculadora* calc)
 {
-	for(Node* cur = calc->output_rpn->head, *is_op = calc->is_op->head
+	Node *cur, *is_op;
+	for(cur = calc->output_rpn->head, is_op = calc->is_op->head
 		; cur; cur = cur->next, is_op = is_op->next)
 	{
 		if(is_op->number)
@@ -202,10 +204,22 @@ void print_rpn_format(Calculadora* calc)
 		}
 		else
 		{
-			printf(" %lld ", cur->number);
+			printf(" %ld ", cur->number);
 		}
 	}
 	printf("\n");
+}
+
+void overflow(int64_t value){
+	int64_t max = 281474976710656; /* 2^48 */
+	if(value > max){
+		printf("\nOverflow detectado em: %ld\n", max);
+		exit(0);
+	}
+	if(value < 0){
+		printf("\nValor não é um inteiro.\n");
+		exit(0);
+	}
 }
 
 void free_calc(Calculadora* calc)
