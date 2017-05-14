@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "int_48.h"
+#include <stdint.h>
 
 #ifndef PILHA_H
 #define PILHA_H
@@ -12,24 +12,24 @@ typedef struct pilha{
 
 typedef struct node{
 	struct node* next;
-	int48_t number;
+	int64_t number;
 } Node;
 
 Pilha* create_pilha();
 
-Node* create_node(int48_t number);
+Node* create_node(int64_t number);
 
-void push(Pilha* pilha, int48_t number);
+void push(Pilha* pilha, int64_t number);
 
 // Para transformar a expressao em RPN vamos usar o alrotimo shunting yard
 // para que esse algoritmo trasnforme a expressao corretamente
 // precisamos empilhar na ordem inversa por isso iremos usar
 // essa funcao para empilhar pra baixo
-void push_bellow(Pilha* pilha, int48_t number);
+void push_bellow(Pilha* pilha, int64_t number);
 
-int48_t pop(Pilha* pilha);
+int64_t pop(Pilha* pilha);
 
-int48_t top(Pilha* pilha);
+int64_t top(Pilha* pilha);
 
 void print_pilha(Pilha* pilha);
 

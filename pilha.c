@@ -80,10 +80,11 @@ int48_t top(Pilha* pilha)
 
 void print_pilha(Pilha* pilha)
 {
+	Node* cur;
 	if(pilha)
 	{
 		printf("Head ");
-		for(Node* cur = pilha->head; cur; cur = cur->next)
+		for(cur = pilha->head; cur; cur = cur->next)
 		{
 			printf("%lld %s", cur->number, cur->next == NULL ? "Tail\n" : "-> ");
 		}
